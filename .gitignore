@@ -1,0 +1,32 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Sensitive vars
+*.tfvars
+*.tfvars.json
+
+# Terraform lock file (optional: keep it if you want reproducibility)
+# .terraform.lock.hcl
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
