@@ -22,3 +22,12 @@ module "lambda_function" {
   filename        = "${path.module}/../../app/function.zip"
   table_name      = module.events_table.table_name
 }
+
+module "api_gateway" {
+  source = "../modules/api_gateway"
+
+  project_name = var.project_name
+  environment  = var.environment
+  lambda_arn   = module.lambda_function.lambda_arn
+  lambda_name  = module.lambda_function.lambda_name
+}
