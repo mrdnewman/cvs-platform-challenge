@@ -30,3 +30,5 @@ venv/
 # IDE
 .vscode/
 .idea/
+*.swp
+.terraform.lock.hcl
