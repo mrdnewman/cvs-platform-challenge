@@ -1,0 +1,20 @@
+
+variable "project_name" {
+  type = string
+}
+
+variable "environment" {
+  type = string
+}
+
+variable "lambda_role_arn" {
+  type = string
+}
+
+variable "filename" {
+  type = string
+}
+
+variable "table_name" {
+  type = string
+}
