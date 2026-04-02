@@ -1,0 +1,37 @@
+
+name: Log Event
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  log-event:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::160823835275:role/platform-event-logger-dev-github-actions-role
+          aws-region: us-west-2
+
+      - name: Send event to API
+        run: |
+          curl -X POST "${{ secrets.API_URL }}/log-event" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "service": "github-actions",
+              "event_type": "push_event",
+              "environment": "dev"
+            }'
+
+      - name: Confirm
+        run: echo "Event sent from CI/CD pipeline"

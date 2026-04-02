@@ -9,10 +9,10 @@ table = dynamodb.Table(os.environ["TABLE_NAME"])
 def lambda_handler(event, context):
     print("event received:", event)
 
-    # 👇 ADD THIS: parse the actual request body
+    # Parse the actual request body
     body = json.loads(event["body"])
 
-    # 👇 STORE CLEAN DATA (not full event wrapper)
+    # STORE CLEAN DATA (not full event wrapper)
     item = {
         "event_id": str(uuid.uuid4()),
         "service": body.get("service"),

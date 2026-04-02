@@ -1,0 +1,22 @@
+
+
+CLI PAYLOAD
+
+curl -X POST "https://wmfnyl0wuc.execute-api.us-west-2.amazonaws.com/log-event" \
+  -H "Content-Type: application/json" \
+  -d '{"service":"billing-api","event_type":"deployment_test003","environment":"Jurrasic Park"}'
+
+
+CHECK LOGS
+# aws logs describe-log-groups --log-group-name-prefix "/aws/lambda/platform-event-logger-dev-event-logger"
+
+TAIL EVENT LOGGER
+# aws logs tail /aws/lambda/platform-event-logger-dev-event-logger --follow
+
+
+SCAN DB FOR PAYLOAD MESSAGE
+# aws dynamodb scan --table-name platform-event-logger-dev-events
+
+Clear DB -- quickest way:
+# aws dynamodb delete-table --table-name platform-event-logger-dev-events
+# terraform apply 
