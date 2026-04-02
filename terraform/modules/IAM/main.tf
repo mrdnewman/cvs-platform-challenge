@@ -16,7 +16,7 @@ resource "aws_iam_role" "github_actions_role" {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
         }
         StringLike = {
-          "token.actions.githubusercontent.com:sub" = "repo:misterdnewman/cvs-platform-challenge:*"
+          "token.actions.githubusercontent.com:sub" = "repo:misterdnewman/cvs-platform-challenge:ref:refs/heads/main"
         }
       }
     }]
