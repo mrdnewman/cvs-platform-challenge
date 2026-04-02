@@ -171,9 +171,15 @@ Terraform builds the system, API Gateway exposes it, Lambda processes events, Dy
 
 ---
 
-## Interview Explanation
+## Future Improvements
 
-I built a self-service platform API that records operational events from pipelines, CLI tools, and applications. API Gateway receives requests, Lambda processes and validates them, DynamoDB stores the events, and CloudWatch provides observability. The infrastructure is provisioned with Terraform and integrated with GitHub Actions using OIDC for secure authentication.
+- Add authentication and authorization with Cognito or a JWT authorizer
+- Add dead-letter queue and retry handling for failed event processing
+- Expand Terraform for multi-environment deployments (dev/stage/prod)
+- Add API Gateway access logging and enhanced observability
+- Enable distributed tracing with AWS X-Ray
+- Add CloudWatch alarms and operational monitoring dashboards
+- Introduce request validation and stronger error handling
 
 ---
 
