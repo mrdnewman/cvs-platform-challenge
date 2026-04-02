@@ -1,2 +1,8 @@
-# cvs-platform-challenge
-Senior Platform Engineer coding challenge — AWS, Terraform, and automation service demo.
+
+
+<p align="center">
+  <strong>CVS Platform Engineer Coding Challenge</strong><br/>
+  AWS • Python • Terraform • Automation Service Demo
+</p>
+
+---
