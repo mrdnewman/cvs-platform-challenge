@@ -2,31 +2,17 @@
 
 ## Overview
 
-This project is a **self-service developer event logging API** built on AWS.
+This project is a **self-service event logging API** built on AWS.
 
 It allows GitHub Actions, CLI tools, and applications to send operational events to a centralized system for **tracking, auditing, and observability**.
-
-In simple terms:
-
-> A client sends an event → the API processes it → the event is stored → logs are captured.
-
----
-
-## Problem This Solves
-
-AWS provides infrastructure-level logging (CloudWatch, CloudTrail), but it does **not track custom platform events** such as:
-
-* deployment started / succeeded / failed
-* job completed
-* service registered
-
-This service fills that gap by providing a **developer-facing event layer**.
 
 ---
 
 ## Architecture
 
-```
+![Architecture](diagrams/architecture.png)
+
+```text
 GitHub Actions / CLI / App
         ↓
    API Gateway
@@ -38,18 +24,20 @@ GitHub Actions / CLI / App
    CloudWatch
 ```
 
-### Flow
+---
 
-1. Client sends HTTP POST request with event payload
-2. API Gateway receives and routes request
-3. Lambda validates and processes the request
+## How It Works
+
+1. A client sends an HTTP POST request with an event payload
+2. API Gateway receives the request
+3. Lambda validates and processes the payload
 4. Event is stored in DynamoDB
 5. Logs are written to CloudWatch
-6. Response is returned to client
+6. Response is returned to the client
 
 ---
 
-## Example Event Payload
+## Example Payload
 
 ```json
 {
@@ -65,15 +53,18 @@ GitHub Actions / CLI / App
 
 ### API Gateway
 
-* Public HTTP entrypoint
+* Public HTTP endpoint
 * Routes requests to Lambda
 
 ### Lambda (Python)
 
-* Validates input
-* Handles errors
-* Writes structured logs
-* Stores events in DynamoDB
+* Located in `app/handler.py`
+* Handles:
+
+  * input validation
+  * error handling
+  * structured logging
+  * DynamoDB writes
 
 ### DynamoDB
 
@@ -83,130 +74,106 @@ GitHub Actions / CLI / App
 
 ### CloudWatch
 
-* Logs Lambda execution
-* Provides observability and debugging
+* Captures logs and metrics from Lambda
 
 ---
 
-## Terraform Infrastructure
+## Infrastructure (Terraform)
 
-Terraform is used to provision all infrastructure:
+Terraform provisions all AWS resources.
 
-* S3 bucket (remote state)
-* DynamoDB table (state locking)
-* DynamoDB table (event storage)
+### Backend
+
+* **S3 bucket** → Terraform remote state
+* **DynamoDB table** → state locking
+
+### Application Infrastructure
+
+* DynamoDB (event storage)
 * IAM roles and policies
 * Lambda function
 * API Gateway
-
-### Backend Setup
-
-* **S3** → stores Terraform state
-* **DynamoDB** → handles state locking
-
-> Note: These are not part of the application runtime.
-
----
-
-## Why Two DynamoDB Tables?
-
-| Table                | Purpose                            |
-| -------------------- | ---------------------------------- |
-| Terraform Lock Table | Prevents concurrent Terraform runs |
-| Events Table         | Stores application event data      |
-
----
-
-## CI/CD and OIDC
-
-GitHub Actions uses **OIDC (OpenID Connect)** for secure AWS authentication:
-
-* No static AWS credentials
-* Short-lived tokens
-* IAM role assumption
-
-The pipeline:
-
-* Authenticates to AWS
-* Sends event payloads to the API
 
 ---
 
 ## Repository Structure
 
 ```bash
-terraform/
-├── bootstrap/        # S3 + DynamoDB backend
-├── modules/          # reusable Terraform modules
-│   └── dynamodb/
-├── main/             # root composition layer
-app/                  # Lambda source code
-.github/workflows/    # CI/CD pipeline
+.
+├── app/
+│   ├── handler.py          # Lambda function
+│   ├── function.zip        # Deployment package
+│   └── handler.py.bak      # backup (not used)
+├── diagrams/
+│   └── architecture.png
+├── terraform/
+│   ├── bootstrap/          # backend setup (S3 + DynamoDB)
+│   ├── main/               # root Terraform configuration
+│   └── modules/
+│       ├── api_gateway/
+│       ├── dynamodb/
+│       ├── IAM/
+│       └── lambda/
+├── cmds/                   # helper commands/scripts
+├── CLAUDE.md
+└── README.md
 ```
 
 ---
 
-## Design Decisions
+## CI/CD (GitHub Actions + OIDC)
 
-### Why Lambda
+* Uses **OIDC** for secure AWS authentication
+* No hardcoded credentials
+* Pipeline:
 
-* Serverless
-* Fast to build
-* Minimal operational overhead
+  * authenticates to AWS
+  * sends event payload to API
 
-### Why DynamoDB
+---
 
-* Scalable
-* Fully managed
-* Ideal for event-style data
+## Key Design Decisions
 
-### Why API Gateway
+### Lambda over ECS
+
+* Faster to build
+* No infrastructure management
+* Ideal for event-driven workloads
+
+### DynamoDB
+
+* Scalable and serverless
+* Fits event-based storage patterns
+
+### API Gateway
 
 * Simple HTTP interface
 * Native Lambda integration
-* Clean entrypoint for external systems
+
+### IAM as Separate Module
+
+* Clean separation of concerns
+* Reusable and maintainable
 
 ---
 
-## Self-Service Model
+## Important Notes
 
-This API allows systems to record events **without manual intervention**.
-
-Instead of relying on infrastructure teams, developers and pipelines can:
-
-> Send events directly → API handles the rest
-
----
-
-## What Was Implemented
-
-* Terraform backend (S3 + DynamoDB locking)
-* DynamoDB event storage
-* Modular Terraform structure
-* GitHub Actions OIDC authentication
-* CI pipeline sending event payloads
-* Full serverless event ingestion flow
-
----
-
-## Key Distinction
-
-| Concept   | Purpose                     |
-| --------- | --------------------------- |
-| Terraform | Builds infrastructure       |
-| API       | Processes and stores events |
+* `terraform/bootstrap/terraform.tfstate` should **not be committed**
+* `handler.py.bak` is not used (safe to remove)
+* `function.zip` is the Lambda deployment artifact
 
 ---
 
 ## One-Line Summary
 
-Terraform builds the system, API Gateway exposes it, Lambda runs the logic, DynamoDB stores the events, and CloudWatch provides visibility.
+Terraform builds the system, API Gateway exposes it, Lambda processes events, DynamoDB stores them, and CloudWatch provides visibility.
 
 ---
 
-## Interview Explanation (Short)
+## Interview Explanation
 
-I built a self-service platform API that records operational events from pipelines, CLI tools, and applications. API Gateway receives requests, Lambda processes and validates them, DynamoDB stores the events, and CloudWatch provides observability. The infrastructure is provisioned using Terraform with secure CI/CD via GitHub Actions OIDC.
+I built a self-service platform API that records operational events from pipelines, CLI tools, and applications. API Gateway receives requests, Lambda processes and validates them, DynamoDB stores the events, and CloudWatch provides observability. The infrastructure is provisioned with Terraform and integrated with GitHub Actions using OIDC for secure authentication.
 
 ---
 
