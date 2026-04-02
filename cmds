@@ -4,7 +4,7 @@ CLI PAYLOAD
 
 curl -X POST "https://wmfnyl0wuc.execute-api.us-west-2.amazonaws.com/log-event" \
   -H "Content-Type: application/json" \
-  -d '{"service":"billing-api","event_type":"deployment_test003","environment":"Jurrasic Park"}'
+  -d '{"service":"CLI-tools","event_type":"deployment_test003","environment":"Jurrasic Park"}'
 
 
 CHECK LOGS
